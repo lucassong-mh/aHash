@@ -100,6 +100,9 @@ Note the import of [HashMapExt]. This is needed for the constructor.
 #![cfg_attr(feature = "specialize", feature(min_specialization))]
 #![cfg_attr(feature = "nightly-arm-aes", feature(stdarch_arm_neon_intrinsics))]
 
+#![feature(allocator_api)]
+#![feature(build_hasher_simple_hash_one)]
+
 #[macro_use]
 mod convert;
 

@@ -188,13 +188,31 @@ cfg_if::cfg_if! {
             /// If the source has already been specified `Err` is returned with a `bool` indicating if the set failed because
             /// method was previously invoked (true) or if the default source is already being used (false).
             #[cfg(not(all(target_arch = "arm", target_os = "none")))]
+            #[cfg(not(feature = "linux"))]
             pub fn set_random_source(source: impl RandomSource + Send + Sync + 'static) -> Result<(), bool> {
                 RAND_SOURCE.set(Box::new(Box::new(source))).map_err(|s| s.as_ref().type_id() != TypeId::of::<&DefaultRandomSource>())
             }
 
+            #[cfg(feature = "linux")]
+            pub fn set_random_source(source: impl RandomSource + Send + Sync + 'static) -> Result<(), bool> {
+                let source: Box<dyn RandomSource + Send + Sync + 'static> = Box::try_new(source).unwrap();
+                let source = Box::try_new(source).unwrap();
+                RAND_SOURCE
+                    .set(source)
+                    .map_err(|s| s.as_ref().type_id() != TypeId::of::<&DefaultRandomSource>())
+            }
+
             #[inline]
+            #[cfg(not(feature = "linux"))]
             fn get_src() -> &'static dyn RandomSource {
                 RAND_SOURCE.get_or_init(|| Box::new(Box::new(DefaultRandomSource::new()))).as_ref()
+            }
+
+            #[cfg(feature = "linux")]
+            fn get_src() -> &'static dyn RandomSource {
+                let source: Box<(dyn RandomSource + Send + Sync + 'static)> = Box::try_new(DefaultRandomSource::new()).unwrap();
+                let source = Box::try_new(source).unwrap();
+                RAND_SOURCE.get_or_init(|| source).as_ref()
             }
         }
 }

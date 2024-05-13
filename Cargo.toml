@@ -24,6 +24,7 @@ doc = true
 
 [features]
 default = ["std", "runtime-rng"]
+linux = []
 
 # Enabling this will enable `AHashMap` and `AHashSet`.
 std = []
